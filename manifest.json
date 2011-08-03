@@ -7,7 +7,9 @@
   },
   "background_page": "background.html",
   "permissions": [
+	"chrome://favicon/",
     "http://api.flickr.com/",
+    "history",
     "tabs",
     "management"
   ],

@@ -10,21 +10,29 @@
     right: 9px;
   }
   #wrapper {
-    background-color: rgba(255,255,255,1);
-    color: #666;
-    opacity: 0;
+    background-color: #f5f5f5;
+    border: 1px solid #666;
+    border-radius: 2px;
+	-webkit-transition: border-color .218s;
+	-webkit-transition-property: border-color;
+	-webkit-transition-duration: 0.218s;
+	-webkit-transition-timing-function: initial;
+	-webkit-transition-delay: initial;    
+	color: #666;
+	display: inline-block;
+	font-family: sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    opacity: 0.4;
     -webkit-transition-property: opacity;
     -webkit-transition-duration: 0.8s;
-    padding: 0.4em;
-    border-radius: 0.3em;
-    padding-left: 2em;
-    padding-right: 2em;
-    padding-top: 0.3em;
-    font-family: sans-serif;
-    font-size: 13px;
-    display: inline-block;
-    vertical-align:middle;
-    border: 1px solid #ccc;
+    padding: 7px 0 7px 21px;
+    vertical-align: middle;
+    width: 140px;
+  }
+  #wrapper:hover {
+    border: 1px solid #999;
+  	color: #444;
   }
   #plusone {
     position: absolute;
@@ -63,6 +71,11 @@
     -webkit-transform-origin: 50% 50%;
   }
 
+  #container:hover {
+    opacity: 1;
+    -webkit-transform: translateX(0px) translateZ(0px) rotateY(0deg);
+  }
+
   #apps {
     height: 100%;
     color: white;
@@ -70,9 +83,46 @@
     -webkit-transform-style: preserve-3d;
   }
 
-  #container:hover {
+  #history {
+    overflow: scroll;
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    top: 44px;
+    background-color: rgba(0, 0, 0, 0.4);
+    box-shadow: 0px 0px 5px #000;
+    opacity: 0;
+    padding: 10px;
+    -webkit-perspective: 400;
+    -webkit-transform-style: preserve-3d;
+    -webkit-transition-property: -webkit-transform opacity;
+    -webkit-transition-duration: 0.5s;
+    -webkit-transform: translateX(15px) translateZ(150px) rotateY(25deg);
+    -webkit-transform-origin: 50% 50%;
+  }
+
+  #history:hover {
     opacity: 1;
     -webkit-transform: translateX(0px) translateZ(0px) rotateY(0deg);
+  }
+  
+  #history a {
+  	background-repeat: no-repeat;
+  	color: #aaa;
+	display: block;		
+	font-family: sans-serif; 
+	font-size: 12px;
+	height: 24px;		
+	margin: 0 0 10px 0;
+	overflow: hidden;
+	padding: 0 0 0 30px;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	width: 110px;		
+  }
+  
+  #history a:hover {
+  color: #fff;
   }
 
   ::-webkit-scrollbar {
@@ -121,7 +171,7 @@ var getAllCallback = function(list) {
         var apps = document.getElementById("apps");
         var counter = 0;
         for (var i in list) {
-            // we don't want to do anything with extensions yet.
+            // we do not want to do anything with extensions yet.
             var extInf = list[i];
             if (extInf.isApp && extInf.enabled) {
                 var app = document.createElement("div");
@@ -212,7 +262,7 @@ window.addEventListener("DOMContentLoaded", function() {
         }
     }
     else {
-        byline.innerHTML = "view in photostream";
+        byline.innerHTML = "View in photostream";
     }
     window.onbeforeunload = function() {
         document.body.onmousemove = null;
@@ -232,6 +282,16 @@ window.addEventListener("DOMContentLoaded", function() {
     }, 200);
 }, false);
 
+// Code taken from Chrome extensions documentation history examples
+// To look for history items visited in the last week,
+// subtract a week of microseconds from the current time.
+var microsecondsPerWeek = 1000 * 60 * 60 * 24 * 7;
+var oneWeekAgo = (new Date).getTime() - microsecondsPerWeek;
+
+// Track the number of callbacks from chrome.history.getVisits()
+// that we expect to get.  When it reaches zero, we have all results.
+var numRequestsOutstanding = 0;
+
 </script>
 
 
@@ -250,5 +310,23 @@ window.addEventListener("DOMContentLoaded", function() {
        <div class="g-plusone" data-size="standard" data-count="true"></div>
       </div>
       <div id="container"><div id="apps"> </div></div>
+      <div id="history"></div>
     </body>
+    
+<script type="text/javascript">
+var historyDiv = document.getElementById("history");
+chrome.history.search({"text": ""},
+	function(historyItems) {
+		for (var i = 0; i != historyItems.length; ++i) {
+			var url = historyItems[i].url;
+			var title = historyItems[i].title;
+			var link = document.createElement("a");		
+			link.href = historyItems[i].url;
+			link.innerHTML = title;
+			link.style.backgroundImage = "url(chrome://favicon/" + url + ")";
+			historyDiv.appendChild(link);
+		}
+});
+</script>
+
 </html>
